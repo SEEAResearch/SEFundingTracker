@@ -40,7 +40,7 @@ library(ceramic)
 library(mapboxapi)
 font_import("C:/Users/GraceParker/Downloads/Open_Sans")
 # set working directory 
-# setwd("C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/GitHubFolder")
+# setwd("C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/GitHubFolder/SEFundingTracker")
 
 #insert data
 data_raw <- read.csv("C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/BIL_AwardSummaries_2023-07-03.csv")
@@ -948,7 +948,7 @@ Central Florida Regional Transportation Authority (CFRTA): The Federal Transit A
 Army Corps of Engineers (ACE) South Florida Ecosystem Restoration Program: The ACE committed $1.1 billion to reconnect habitats in the Everglades, which have been isolated by the impacts of human development. According to the Biden Administration, this is the single largest investment in Everglade’s’ history.
 
 Seminole Tribe of Florida: The Department of Commerce committed about $500,000 to the Seminole Tribe of Florida to establish a digital training program and provide broadband equipment to support schools, libraries, and workforce development.
-</div>:
+</div>
 
 ##### Georgia
 <div class = "row">
@@ -1168,8 +1168,8 @@ funcLA%>% select(Category, Funding)%>% kbl() %>%
 Jefferson Parish, Louisiana: The Department of Transportation committed $6.9 million to the Jefferson Parish, Louisiana, to purchase three diesel-electric buses and construct new administrative and maintenance buildings.
 
 Louisiana Department of Natural Resources: The Department of Interior committed $25 million to the Louisiana DNR to plug and restore orphaned wells, implement methane monitoring protocols, and improve water quality monitoring.
-:::
-:::
+
+
 ##### Mississippi
 <div class = "row">
 <div class = "col-md-7" style="padding-right:25px;">
@@ -1538,7 +1538,7 @@ funcVA%>% select(Category, Funding)%>% kbl() %>%
 <h4>Spotlight on Projects</h4>
 National Association of State Energy Officials: The Department of Energy awarded $1.5 million to NASEO for their work building a national electric vehicle infrastructure network.
 
-#### Funding By Category
+### Funding By Category
 <div class = "row">
 <div class = "col-md-7" style="padding-right:25px;">
 ``` {r echo=FALSE}
