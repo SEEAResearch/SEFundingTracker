@@ -76,10 +76,10 @@ targetE <- c("AL","AR","FL","GA","KY", "LA", "MS", "NC", "SC", "TN", "VA", "GU",
 targetO <- c("GU", "PR", "MP", "AS", "VI")
 SETerrData <- dplyr::filter(funData,recipient_state %in% targetE) #filter to SE and territories
 
-# USfundByState <- group_by(funData, recipient_state) %>% dplyr::summarise(
-#   StateFunding = sum(transaction_obligated_amount))%>%
-#   as.data.frame()
-# UStot<- sum(USfundByState$StateFunding)
+USfundByState <- group_by(funData, recipient_state) %>% dplyr::summarise(
+  StateFunding = sum(transaction_obligated_amount))%>%
+  as.data.frame()
+UStot<- sum(USfundByState$StateFunding)
 #group funding by territory/state
 fundByState <- group_by(SETerrData, recipient_state) %>% dplyr::summarise(
   StateFunding = sum(transaction_obligated_amount))%>%
@@ -1714,7 +1714,8 @@ funcVA%>% select(Category, Funding)%>% kbl() %>%
 National Association of State Energy Officials: The Department of Energy awarded $1.5 million to NASEO for their work building a national electric vehicle infrastructure network.
 
 ### Funding By Category
-
+<div class = "row">
+<div class = "col-md-7" style="padding-right:25px;">
 ``` {r echo=FALSE}
 funcSE <- funData %>% dplyr::filter(recipient_state %in% targetM)%>% 
   group_by(budget_subfunction) %>% dplyr::summarise(
@@ -1750,7 +1751,9 @@ pie
 
 # ggsave("C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/Categories_02_2024.png", width = 6,   height = 4.25, dpi=1100)
 ```
+</div>
 
+<div class = "col-md-5">
 ``` {r echo=FALSE, out.width="80%"}
 funcSE$Funding <- signif(funcSE$Funding, 5)
 funcSE$Funding <- formattable::currency(funcSE$Funding, digits = 0L)
@@ -1761,7 +1764,7 @@ funcSE%>% select(Category, Funding)%>% kbl() %>%
   column_spec(1, "10cm")%>%
   column_spec(2,"3cm")
 ```
-
+</div>
 ### Funding by Award Type
 <div class = "row">
 <div class = "col-md-7" style="padding-right:25px;">
