@@ -18,8 +18,9 @@ p {
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, echo=FALSE, results='hide'}
 knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+###SET WORKING DIRECTORY TO GitHubFolder in 2023_FederalFundingTracker
 
-#install packages 
+#load packages 
 library(sf)
 library(dplyr)
 library(tidyverse)
@@ -30,12 +31,11 @@ library(formattable)
 library(tmap)
 library(extrafont)
 library(mapboxapi)
-font_import("C:/Users/GraceParker/Downloads/Open_Sans")
 
-#insert data
-territories <- st_read("C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/Territories/", quiet=TRUE)
+#insert shapefile for states and territories
+territories <- st_read("../Territories", quiet=TRUE)
 
-#clean BIL data
+#these targets are the FIPS codes needed to filter data to relevant states and territories
 targetF <- c("01","05","12","13","21","22","28","37","45","47","51","72","60","69","66","78")
 targetG <- c(1,5,12,13,21,22,28,37,45,47,51,72,60,69,66,78)
 targetH <- c("01","05","12","13","21","22","28","37","45","47","51")
@@ -44,22 +44,22 @@ SEstates <- dplyr::filter(territories,FIPS %in% targetH) #filter to SE
 # SETerrData <- dplyr::filter(data,prime_award_summary_recipient_state_fips_code %in% targetG) #filter to SE and territories
 
 #insert function/award type and population data by year
-Asst2024_raw <- read.csv("C:/Users/GraceParker/Southeast Energy Efficiency Alliance Inc/Team SEEA - Documents/Research/Project_Files/2023_FederalFundingTracker/GitHubFolder/Data_01_22_2024/BILFY2~3/FY2024~3.CSV")
-Con2024_raw <- read.csv("C:/Users/GraceParker/Southeast Energy Efficiency Alliance Inc/Team SEEA - Documents/Research/Project_Files/2023_FederalFundingTracker/GitHubFolder/Data_01_22_2024/BILFY2~3/FY2024~2.CSV")
-Unl2024_raw <- read.csv("C:/Users/GraceParker/Southeast Energy Efficiency Alliance Inc/Team SEEA - Documents/Research/Project_Files/2023_FederalFundingTracker/GitHubFolder/Data_01_22_2024/BILFY2~3/FY2024~4.CSV")
+Asst2024_raw <- read.csv("../Data_01_22_2024/BILFY2~3/FY2024~3.csv")
+Con2024_raw <- read.csv("../Data_01_22_2024/BILFY2~3/FY2024~2.CSV")
+Unl2024_raw <- read.csv("../Data_01_22_2024/BILFY2~3/FY2024~4.CSV")
 
-Asst2023_raw <- read.csv("C:/Users/GraceParker/Southeast Energy Efficiency Alliance Inc/Team SEEA - Documents/Research/Project_Files/2023_FederalFundingTracker/GitHubFolder/Data_01_22_2024/BILFY2~2/FY2023~3.CSV")
-Con2023_raw <- read.csv("C:/Users/GraceParker/Southeast Energy Efficiency Alliance Inc/Team SEEA - Documents/Research/Project_Files/2023_FederalFundingTracker/GitHubFolder/Data_01_22_2024/BILFY2~2/FY2023~2.CSV")
-Unl2023_raw <- read.csv("C:/Users/GraceParker/Southeast Energy Efficiency Alliance Inc/Team SEEA - Documents/Research/Project_Files/2023_FederalFundingTracker/GitHubFolder/Data_01_22_2024/BILFY2~2/FY2023~4.CSV")
+Asst2023_raw <- read.csv("../Data_01_22_2024/BILFY2~2/FY2023~3.CSV")
+Con2023_raw <- read.csv("../Data_01_22_2024/BILFY2~2/FY2023~2.CSV")
+Unl2023_raw <- read.csv("../Data_01_22_2024/BILFY2~2/FY2023~4.CSV")
 
-Asst2022_raw <- read.csv("C:/Users/GraceParker/Southeast Energy Efficiency Alliance Inc/Team SEEA - Documents/Research/Project_Files/2023_FederalFundingTracker/GitHubFolder/Data_01_22_2024/BILFY2~1/FY2022~3.CSV")
-Con2022_raw <- read.csv("C:/Users/GraceParker/Southeast Energy Efficiency Alliance Inc/Team SEEA - Documents/Research/Project_Files/2023_FederalFundingTracker/GitHubFolder/Data_01_22_2024/BILFY2~1/FY2022~2.CSV")
-Unl2022_raw <- read.csv("C:/Users/GraceParker/Southeast Energy Efficiency Alliance Inc/Team SEEA - Documents/Research/Project_Files/2023_FederalFundingTracker/GitHubFolder/Data_01_22_2024/BILFY2~1/FY2022~4.CSV")
+Asst2022_raw <- read.csv("../Data_01_22_2024/BILFY2~1/FY2022~3.CSV")
+Con2022_raw <- read.csv("../Data_01_22_2024/BILFY2~1/FY2022~2.CSV")
+Unl2022_raw <- read.csv("../Data_01_22_2024/BILFY2~1/FY2022~4.CSV")
 
 #insert population data
-pop2022_raw <- read.csv("C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/POP2022.csv")
+pop2022_raw <- read.csv("../POP2022.csv")
 
-#append data together
+#bind funding data together--may need to add more as additional years are in the data
 funData <- rbind(Asst2023_raw, Con2023_raw)
 funData <- rbind(funData, Unl2023_raw)
 funData <- rbind(funData, Asst2022_raw)
@@ -72,15 +72,18 @@ funData <- rbind(funData, Unl2024_raw)
 #remove NA values from fund data and select relevant fields
 funData <- funData[!is.na(funData$transaction_obligated_amount),]
 funData <-select(funData, budget_subfunction, awarding_agency_name, awarding_subagency_name, transaction_obligated_amount, recipient_state, recipient_county, award_type, recipient_name, program_activity_name, cfda_number, cfda_title)
+
+#filter to SE and territories
 targetE <- c("AL","AR","FL","GA","KY", "LA", "MS", "NC", "SC", "TN", "VA", "GU", "PR", "MP", "AS", "VI")
 targetO <- c("GU", "PR", "MP", "AS", "VI")
 SETerrData <- dplyr::filter(funData,recipient_state %in% targetE) #filter to SE and territories
 
+#group national funding by territory/state
 USfundByState <- group_by(funData, recipient_state) %>% dplyr::summarise(
   StateFunding = sum(transaction_obligated_amount))%>%
   as.data.frame()
 UStot<- sum(USfundByState$StateFunding)
-#group funding by territory/state
+#group SE funding by territory/state
 fundByState <- group_by(SETerrData, recipient_state) %>% dplyr::summarise(
   StateFunding = sum(transaction_obligated_amount))%>%
   as.data.frame()
@@ -119,17 +122,23 @@ funData_national$Region = ifelse(funData_national$recipient_state == "HI","Hawai
 funData_national$Region = ifelse(funData_national$recipient_state == "","International",funData_national$Region)
 funData_national$Region = ifelse(funData_national$recipient_state %in% International,"International",funData_national$Region)
 funData_national$Region = ifelse(funData_national$recipient_state %in% Territories,"Territories",funData_national$Region)
+
+#divide national funding total by total population 
 perCapita_national <- sum(funData_national$Funding)/333287557
+#summarize by region
 funData_national <- funData_national %>% select(Region, Funding)%>%
   na.omit()%>%
   group_by(Region)%>%
   dplyr::summarise(Funding = sum(Funding)) %>% 
   as.data.frame()
+
 #repeat for grants
 funData_nat_grants <- funData
+#filter to grants
 funData_nat_grants <- funData_nat_grants%>% filter(award_type=="COOPERATIVE AGREEMENT (B)"|award_type=="PROJECT GRANT (B)")%>%group_by(recipient_state)%>%
   dplyr::summarise(Funding = sum(transaction_obligated_amount)) %>% 
   as.data.frame()
+#mark by region
 Region = ifelse(funData_nat_grants$recipient_state %in% NEEP,"NEEP","")
 funData_nat_grants = cbind(Region,funData_nat_grants)
 funData_nat_grants$Region = ifelse(funData_nat_grants$recipient_state %in% SEEA,"SEEA",funData_nat_grants$Region)
@@ -150,7 +159,6 @@ funData_nat_grants <- funData_nat_grants %>% select(Region, Funding)%>%
   as.data.frame()
 
 #make pretty for table
-# colnames(FunData_national)[2] <- "Funding"
 funData_national$Funding <- formattable::currency(funData_national$Funding, digits=0L)
 
 #create REEO targets AGAIN for population data
@@ -161,7 +169,8 @@ SWEEP1 <- c(".New Mexico",".Arizona",".Colorado",".Utah",".Nevada",".Wyoming")
 NEEA1 <- c(".Montana",".Idaho",".Oregon",".Washington")
 SPEER1 <- c(".Texas",".Oklahoma")
 colnames(pop2022_raw)[1]<- "State"
-#mark their REEO
+
+#mark states by their REEO
 Region = ifelse(pop2022_raw$State %in% NEEP1,"NEEP","")
 popRegion = cbind(Region,pop2022_raw)
 popRegion$Region = ifelse(popRegion$State %in% SEEA1,"SEEA",popRegion$Region)
@@ -183,6 +192,7 @@ popRegion <- popRegion %>% select(Region, X.3)%>% #summarize population by regio
 RegMap <- left_join(funData_national, popRegion, by="Region")
 RegMap$perCapita = RegMap$Funding/RegMap$Population
 RegMap$perCapita <- formattable::currency(RegMap$perCapita, digits=0L)
+
 #join shapefile to grant data and calculate per capita funding
 RegMap <- left_join(RegMap,funData_nat_grants, by="Region")
 RegMap$perCapitaGrants = RegMap$GrantFunding/RegMap$Population
@@ -190,6 +200,7 @@ RegMap$perCapitaGrants <- formattable::currency(RegMap$perCapitaGrants, digits=0
 RegMap$GrantFunding <- formattable::currency(RegMap$GrantFunding, digits=0L)
 
 Regiontable<- RegMap%>% select(Region, Funding)
+#create table of regional funding
 Regiontable%>% kbl(row.names=FALSE) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"), full_width = F, html_font="Open Sans", font_size = 14)%>%
   add_header_above(c("Funding by Region"=2))%>%
@@ -197,39 +208,18 @@ Regiontable%>% kbl(row.names=FALSE) %>%
   column_spec(1, "12cm")%>%
   column_spec(2, "3cm")
 Regiontable
-# save_kable(Regiontable,"C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/Regiontable.png")
+# save_kable(Regiontable,"C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/Regiontable.png") #this is for saving a table for the report
 
 # ###whitepaper maps
-# #experiment with projection
-# install.packages("albersusa")
-# library(remotes)
-# remotes::install_git("https://git.rud.is/hrbrmstr/albersusa.git")
-# install.packages("maptools", repos="http://R-Forge.R-project.org")
-# library(albersusa)
-# alb_usa <- albersusa::usa_sf('laea')%>%
-#   select(1:7)
-# Region = ifelse(alb_usa$iso_3166_2 %in% NEEP,"NEEP","")
-# alb_usa = cbind(Region,alb_usa)
-# alb_usa$Region = ifelse(alb_usa$iso_3166_2 %in% SEEA,"SEEA",alb_usa$Region)
-# alb_usa$Region = ifelse(alb_usa$iso_3166_2 %in% MEEA,"MEEA",alb_usa$Region)
-# alb_usa$Region = ifelse(alb_usa$iso_3166_2 %in% SPEER,"SPEER",alb_usa$Region)
-# alb_usa$Region = ifelse(alb_usa$iso_3166_2 %in% SWEEP,"SWEEP",alb_usa$Region)
-# alb_usa$Region = ifelse(alb_usa$iso_3166_2 %in% NEEA,"NEEA",alb_usa$Region)
-# alb_usa$Region = ifelse(alb_usa$iso_3166_2 == "AK","Alaska",alb_usa$Region)
-# alb_usa$Region = ifelse(alb_usa$iso_3166_2 == "CA","California",alb_usa$Region)
-# alb_usa$Region = ifelse(alb_usa$iso_3166_2 == "HI","Hawaii",alb_usa$Region)
-# alb_usa$Region = ifelse(alb_usa$iso_3166_2 == "","International",alb_usa$Region)
-# alb_usa$Region = ifelse(alb_usa$iso_3166_2 %in% International,"International",alb_usa$Region)
-# alb_usa$Region = ifelse(alb_usa$iso_3166_2 %in% Territories,"Territories",alb_usa$Region)
-# st_write(alb_usa,"C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/albers_us1.shp")
-# regions <- st_read("C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/albers_us1_Dissolve.shp")
+#national map at region level for grant and total funding
+# regions <- st_read("../AlbersShapefile/albers_us1_Dissolve.shp")
 # #join by FIPS or iso
 # Grantsmap_test <- left_join(regions, funData_nat_grants, by="Region")
 # Grantsmap_test <- Grantsmap_test[!is.na(Grantsmap_test$Shape_Area),]
 # Grantsmap_test2 <- Grantsmap_test
 # Grantsmap_test$Region_Name <- c("Alaska","California","Hawaii","Midwest","Northwest","Northeast","Southeast","South Central","Southwest")
 # 
-# tm_shape(Grantsmap_test) + 
+# tm_shape(Grantsmap_test) +
 #   tm_polygons("GrantFunding",
 #           palette= c("#B8E9F0","#75C7D3", "#00869F", "#00447C"),
 #           breaks=c(0, 1000000000,5000000000, 15000000000, Inf),
@@ -247,7 +237,7 @@ Regiontable
 # tm_shape(Grantsmap_test2)+
 #   tm_borders(col="white", lwd=1)+
 # tmap_options(check.and.fix = TRUE)+
-# tm_layout(main.title = "The Northeast Has Received Far More Grant Funding Than Any \nOther Region",
+# tm_layout(main.title = "The Northeast Has Received Far More Grant Funding Than Any Other Region",
 #       main.title.fontfamily = "Calibri",
 #       main.title.fontface = "bold",
 #       main.title.size= 1,
@@ -259,7 +249,7 @@ Regiontable
 #       legend.text.size=.8,
 #       legend.bg.color= "white",
 #       legend.bg.alpha=.6)
-# tmap_save(filename="C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/Grants_Nat_02_2024v2.png", height=4, width =6, dpi=1200)
+# tmap_save(filename="../Grants_Nat_02_2024v2.png", height=4, width =6, dpi=1200)
 # 
 # Totalmap <- left_join(regions, funData_national, by="Region")
 # Totalmap <- Totalmap[!is.na(Totalmap$Shape_Area),]
@@ -292,14 +282,17 @@ Regiontable
 #       legend.text.size=.8,
 #       legend.bg.color= "white",
 #       legend.bg.alpha=.6)
-# 
+
 # tmap_save(filename="C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/Total_Nat_02_2024v2.png", height=4, width =6, dpi=1200)
 
+#calculate the percent of grant funding that goes to the Southeast
 # totalUS <- sum(Grantsmap$SUM_Fundin)
 # SE_perc <- Grantsmap$SUM_Fundin[8]/totalUS*100
+#calculate US per capita
 # pop2022_raw$X.3 <- gsub(",","",pop2022_raw$X.3)
 # USperCap <- totalUS/as.numeric(pop2022_raw$X.3[4])
 
+#calculate direct funding going to Southeast for whitepaper
 # DirectSE <- funData%>%filter(award_type=="DIRECT PAYMENT FOR SPECIFIED USE, AS A SUBSIDY OR OTHER NON-REIMBURSABLE DIRECT FINANCIAL AID (C)")%>%
 #   filter(recipient_state %in% SEEA)
 # DirectSEFCC <- DirectSE%>%filter(awarding_agency_name=="FEDERAL COMMUNICATIONS COMMISSION (FCC)")
@@ -311,7 +304,7 @@ Regiontable
 colnames(pop2022_raw)[1] <- "State"
 pop2022 <-select(pop2022_raw, State, X.3)
 
-#retrieve total and perCap for US
+#retrieve total and perCap for US for the report
 totalUS <- formattable::currency(sum(funData$transaction_obligated_amount), digits=0L)
 pop2022$X.3 <- as.numeric(gsub(",","",pop2022$X.3))
 totPopUS <- pop2022$X.3[4]
@@ -330,7 +323,7 @@ DataTerr <- dplyr::filter(funData, recipient_state %in% targetO)
 targetF <- c(".Alabama",".Arkansas",".Florida",".Georgia",".Kentucky", ".Louisiana", ".Mississippi", ".North Carolina", ".South Carolina", ".Tennessee", ".Virginia")
 pop2022 <- dplyr::filter(pop2022, State %in% targetF)
 
-#calculate percent and per cap funding
+#calculate percent and per cap funding for the report
 pop2022$State <- c('AL', 'AR', 'FL', 'GA', 'KY', 'LA', 'MS', 'NC', 'SC', 'TN', 'VA')
 colnames(pop2022)[1] <- "STATE"
 fundByState <- left_join(fundByState, pop2022, by = "STATE") 
@@ -355,52 +348,7 @@ BIL$StateFunding <- signif(as.numeric(BIL$StateFunding), 5)
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, echo=FALSE, results='hide', fig.show='hide'}
 BIL$StateFunding <- formattable::currency(BIL$StateFunding)
-#tmap
-# tmap_mode(mode ="plot")
-# bbox_SE <- st_bbox(SEstates)
-# 
-# # tm_basemap("CartoDB.PositronNoLabels")
-# 
-# mbtiles <- get_static_tiles(
-#   location = c(-100, 23, -67, 40),
-#   zoom = 4,
-#   style_url= "mapbox://styles/gparker-seea/clkr4hgj800zo01qk7npq3p0x",
-#   username="gparker-seea",
-#   access_token= "pk.eyJ1IjoiZ3Bhcmtlci1zZWVhIiwiYSI6ImNsa3I0ZHFtajJnc2QzcWtlajlmbWV3d2IifQ.jk6o3SXtTTAneVg11e_pww"
-# )
-# 
-# # tm_shape(territories, is.master=F)+
-# #   tm_fill(col="grey70")+
-# tm_shape(mbtiles)+
-#   tm_rgb() + 
-# tm_shape(BIL) +
-#   tm_polygons("StateFunding",
-#           palette= c("#B8E9F0","#75C7D3", "#00869F", "#00447C"),
-#           breaks=c(1000000000, 1500000000, 2000000000, 3000000000, Inf),
-#           textNA= "$0",
-#           labels = c(
-#       "$1-1.5 billion", "$1.5-2 billion", "$2-3 billion", "$3 billion+"),
-#       popup.vars= c("Funding: "="StateFunding"),
-#       popup.format= list(prefix="$", big.num.abbr=NA),
-#       id= "NAME",
-#       alpha=.85,
-#       title= "BIL State Funding",
-#       border.col="white")+
-#   tm_borders(col="white", lwd=.25)+
-# tm_shape(SEstates)+
-#   tm_borders(col="white", lwd=1)+
-# tmap_options(check.and.fix = TRUE)+
-# tm_layout(main.title = "Bipartisan Infrastructure Law Funding in the Southeast",
-#       main.title.fontfamily = "Calibri",
-#       main.title.fontface = "bold", 
-#       main.title.size= 1,
-#       # asp= 1.5,
-#       legend.position= c("right","bottom"),
-#       legend.text.fontfamily = "Calibri", 
-#       legend.title.fontfamily = "Calibri", 
-#       legend.title.size= 1)
-# 
-# tmap_save(filename="C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/funding.png", height=4, width =6, dpi=1200)
+
 ```
 
 <div class = "row">
@@ -413,6 +361,8 @@ colnames(GrantsCA_df)[1] <-"STATE"
 Grantsmap <- left_join(SETerr, GrantsCA_df, by="STATE")
 #tmap
 tmap_mode(mode ="view")
+
+##create interactive map with total and grant funding, this is main map on dashboard
 BILmap <- tm_basemap("CartoDB.PositronNoLabels")+
 tm_shape(BIL) +
   tm_polygons("StateFunding",
@@ -436,29 +386,6 @@ tm_shape(BIL) +
       id= "NAME",
       title= "Southeast Grants",
       border.col="white")+
-  # tm_shape(Regional) +
-  # tm_polygons("Funding",
-  #         palette= c("#75C7D3", "#00869F", "#006A7E", "#00315E"),
-  #         breaks=c(0, 5000000000,10000000000, 20000000000, Inf),
-  #         textNA= "$0",
-  #         labels = c("$0-5 billion", "$5-10 billion", "$10-20 billion", "$20 billion+"),
-  #     popup.vars= c("Funding: "="Funding"),
-  #     popup.format= list(prefix="$", big.num.abbr=NA),
-  #     id= "NAME",
-  #     title= "Regional Total",
-  #     border.col="white")+
-  # tm_shape(Regional_Grants) +
-  # tm_polygons("Funding",
-  #         palette= c("#75C7D3", "#00869F", "#006A7E", "#00315E"),
-  #         breaks=c(0, 500000000,1000000000, 5000000000, Inf),
-  #         textNA= "$0",
-  #         labels = c("$0-500 million", "$.5-1 billion", "$1-5 billion", "$5 billion+"),
-  #     popup.vars= c("Funding: "="Funding"),
-  #     popup.format= list(prefix="$", big.num.abbr=NA),
-  #     id= "NAME",
-  #     title= "Regional Grants",
-  #     border.col="white")+
-  # tm_borders(col="white", lwd=.25)+
 tmap_options(check.and.fix = TRUE, output.size=50)+
 tm_layout(main.title = "Bipartisan Infrastructure Law Funding in the Southeast",
       main.title.fontfamily = "Open Sans",
@@ -470,43 +397,10 @@ tm_layout(main.title = "Bipartisan Infrastructure Law Funding in the Southeast",
       legend.title.size= 1)+
   tm_view(set.view=c(-85.2,35,5))
 BILmap
-# BILmap %>% 
-#   tmap_leaflet() %>%
-#   leaflet::hideGroup("Grants")
-
-#tmap COOP AGREEMENTS AND GRANTS
-# colnames(Grants)[1] <- "STATE"
-# Grants <- left_join(SETerr, Grants, by="STATE")
-# Grants$Funding <- formattable::currency(Grants$Funding)
-# # Grants <- left_join(SETerr, Grants, by = "FIPS")
-# tmap_mode(mode ="view")
-# tm_basemap("CartoDB.PositronNoLabels")+
-# tm_shape(Grants) +
-#   tm_polygons("Funding",
-#           palette= c("#75C7D3", "#00869F", "#006A7E", "#00315E"),
-#           breaks=c(0, 100000000, 150000000, 200000000, Inf),
-#           textNA= "$0",
-#           labels = c("$0-50 million", "$50-100 million", "$100-200 million", "$200 million+"),
-#       popup.vars= c("Funding: "="Funding"),
-#       popup.format= list(prefix="$", big.num.abbr=NA),
-#       id= "NAME",
-#       title= "BIL Cooperative Agreement and Grant Funding",
-#       border.col="white")+
-#   tm_borders(col="white", lwd=.25)+
-# tmap_options(check.and.fix = TRUE, output.size=50)+
-# tm_layout(main.title = "BIL Cooperative Agreement and Grant Funding",
-#       main.title.fontfamily = "Open Sans",
-#       main.title.fontface = "bold", 
-#       main.title.size= 1,
-#       asp= 1.5,
-#       legend.text.fontfamily = "Open Sans", 
-#       legend.title.fontfamily = "Open Sans", 
-#       legend.title.size= 1)+
-#   tm_view(set.view=c(-85.2,35,5))
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, echo=FALSE, results='hide', fig.show='hide'}
-
+##whitepaper maps, southeast total funding
 # tmap_mode(mode ="plot")
 # bbox_SE <- st_bbox(SEstates)
 # 
@@ -551,12 +445,12 @@ BILmap
 #       legend.title.fontfamily = "Calibri",
 #       legend.title.size= 1)
 # 
-# tmap_save(filename="C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/SE_total_02_2024.png", height=4, width =6, dpi=1200)
+# tmap_save(filename="../SE_total_02_2024.png", height=4, width =6, dpi=1200)
 
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, echo=FALSE, results='hide', fig.show='hide'}
-
+##whitepaper maps, southeast grant funding
 #tmap
 # tmap_mode(mode ="plot")
 # bbox_SE <- st_bbox(SEstates)
@@ -602,8 +496,9 @@ BILmap
 #       legend.title.fontfamily = "Calibri",
 #       legend.title.size= 1)
 # # 
-# tmap_save(filename="C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/Grants_SE_02_2024.png", height=4, width =6, dpi=1200)
+# tmap_save(filename="../Grants_SE_02_2024.png", height=4, width =6, dpi=1200)
 
+#this create a region table and saves it, we ended up just copying it into excel for formatting
 # RegMap$Region[5] <- "Midwest"
 # RegMap$Region[6] <- "Northwest"
 # RegMap$Region[7] <- "Northeast"
@@ -685,102 +580,20 @@ SEdata <- SEdata[order(SEdata$Funding,decreasing=TRUE),]
 # SEdata$label.point <- with(SEdata, ((zone.start + zone.end) / 2))
 SEdata$color <- c("#BFBFBF", "#6171AF", "#00869F", "#75C7D3", "#AAC5E2", "#8FED94", "#FFF7B3","#FCB616", "#D4442D", "#C70039", "#900C3F")
 SEdata$label <- paste(SEdata$State, SEdata$Percent, "%", sep=" ")
-# library(treemap)
-# tm <- treemap(
-#   dtf = SEdata,
-#   index = "label",
-#   vSize = "Funding",
-#   vColor = "color",
-#   type = 'color', # {treemap}'s equivalent of scale_fill_identity() 
-#   title="Funding Varies Drastically Among States in the Southeast",
-#   fontfamily.title= "Calibri",
-#   fontfamily.labels= "Calibri",
-#   border.col="white",
-#   border.lwds=3
-# )
-# tm
+
+#calculate Southeast percent of funding for whitepaper
 # total <- formattable::currency(sum(fundByState$Funding), digits=0L)
 # SEpercent <- as.numeric(total)/as.numeric(totalUS)*100
 # SEpercent <- format(round(SEpercent, 2), nsmall=2)
 # avgPerCap <- formattable::currency(total/totPop, digits=0L)
 # SEpercPop <- as.numeric(totPop)/as.numeric(totPopUS)*100
 # SEpercPop <- format(round(SEpercPop, 2), nsmall=2)
-# 
-# 
 
-#EXPERIMENT
-# library(highcharter)
-# library(magrittr)
-# 
-# # set options
-# hcoptslang <- getOption("highcharter.lang")
-# hcoptslang$thousandsSep <- ","
-# options(highcharter.lang = hcoptslang)
-# 
-# colors <- c("#BFBFBF", "#6171AF", "#00869F", "#75C7D3", "#AAC5E2", "#8FED94", "#FFF745","#FCB616", "#D4442D", "#C70039", "#900C3F")
-# mytheme <- hc_theme(style = list(fontFamily = "Opens Sans"))
-# 
-# hc1 <- USmap %>%
-#   hchart(
-#     "pie", hcaes(x = State, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(SEdata$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_title(
-#     text = "Southeast Funding by State",
-#     margin = 20,
-#     align = "left",
-#     style=list(fontFamily="Opens Sans"))
-#     # hc_size(height=400,width=400)
-# hc1
 ```
 
 
 ``` {r echo=FALSE, fig.align='center'}
-
-
-# colors <- c("#FFA07A","#F08080", "#900C3F", "#C70039", "#D4442D", "#FCB616","#FFF7B3","#8FED94", "#52BE80", "#AAC5E2", "#75C7D3", "#00869F", "#6171AF","#DCB6D0","#C799C8", "#D2D2D2", "#7B7B7B","#585757")
-# funcSE$Funding <- signif(as.numeric(funcSE$Funding), 5)
-# hc2 <- funcSE %>%
-#   hchart(
-#     "pie", hcaes(x = budget_subfunction, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(funcSE$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_title(
-#     text = "Southeast Funding by Category",
-#     margin = 20,
-#     align = "left"
-#   )
-#     # hc_size(height=400,width=400)
-
-
-
-# colors <- c("#900C3F", "#C70039", "#D4442D", "#FCB616", "#52BE80", "#AAC5E2", "#75C7D3", "#00869F", "#6171AF","#DCB6D0","#C799C8", "#D2D2D2", "#7B7B7B","#585757")
-# fundByType$Funding <- signif(as.numeric(fundByType$Funding), 5)
-# hc3 <- fundByType %>%
-#   hchart(
-#     "pie", hcaes(x = Type, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(fundByType$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_title(
-#     text = "Southeast Funding by Type",
-#     margin = 20,
-#     align = "left"
-#   )
-#     # hc_size(height=400,width=400)
-
-# hw_grid(hc1,hc2,hc3)
+#calculate direct spending for whitepaper
 # dirSpecUse <- dplyr::filter(funData, grepl("DIRECT PAYMENT FOR SPECIFIED USE", award_type))
 # FCC <- dplyr::filter(dirSpecUse, awarding_agency_name == "FEDERAL COMMUNICATIONS COMMISSION (FCC)")
 # totaldirSpec <- sum(dirSpecUse$transaction_obligated_amount)
@@ -791,6 +604,7 @@ SEdata$label <- paste(SEdata$State, SEdata$Percent, "%", sep=" ")
 
 <div class = "col-md-5">
 ``` {r echo=FALSE}
+##create table of funding in teh southeast for whitepaper
 # SEdata <- SEdata[order(SEdata$Funding,decreasing=TRUE),]
 # SEdata$Funding<- formattable::currency(SEdata$Funding, digits=0L)
 # 
@@ -821,6 +635,7 @@ SEdata$label <- paste(SEdata$State, SEdata$Percent, "%", sep=" ")
 # # #
 # save_kable(statesTable,"C:/Users/GraceParker/Downloads/2023_FederalFundingTracker/Statetable_02_2024.png")
 
+##this explores deobligated funding for whitepaper
 # deoblig <- filter(funData, transaction_obligated_amount < 0)%>%
 #   filter(recipient_state %in% targetM)
 # 
@@ -935,26 +750,7 @@ pie <- ggplot(funcAL, aes(x="", y=Percent, fill=Category))+
        legend.title = element_text(color = "#444444"))
 pie
 
-# colors <- c("#FFA07A","#900C3F","#C70039", "#D4442D", "#8FED94", "#00869F", "#6171AF","#DCB6D0","#C799C8","#7B7B7B","#585757")
 funcAL$Funding <- signif(funcAL$Funding, 5)
-# hc <- funcAL %>%
-#   hchart(
-#     "pie", hcaes(x = Category, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(funcAL$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_size(height=400,width=400)%>%
-#     hc_title(
-#     text = "Alabama Funding by Category",
-#     margin = 20,
-#     align = "left"
-#   )
-# hc
-
-
 ```
 </div>
 
@@ -1012,22 +808,6 @@ pie
 
 # colors <- c("#FFA07A", "#900C3F", "#C70039", "#D4442D","#75C7D3", "#00869F","#6171AF","#DCB6D0", "#7B7B7B","#585757")
 funcAR$Funding <- signif(funcAR$Funding, 5)
-# hc <- funcAR %>%
-#   hchart(
-#     "pie", hcaes(x = Category, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(funcAR$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_size(height=400,width=400)%>%
-#     hc_title(
-#     text = "Arkansas Funding by Category",
-#     margin = 20,
-#     align = "left"
-#   )
-# hc
 ```
 </div>
 <div class = "col-md-5">
@@ -1086,22 +866,6 @@ pie
 
 # colors <- c("#FFA07A", "#900C3F","#C70039", "#D4442D","#52BE80", "#75C7D3","#00869F", "#6171AF","#DCB6D0","#C799C8", "#D2D2D2", "#7B7B7B","#585757")
 funcFL$Funding <- signif(funcFL$Funding, 5)
-# hc <- funcFL %>%
-#   hchart(
-#     "pie", hcaes(x = Category, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(funcFL$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_size(height=400,width=400)%>%
-#     hc_title(
-#     text = "Florida Funding by Category",
-#     margin = 20,
-#     align = "left"
-#   )
-# hc
 ```
 </div>
 <div class = "col-md-5">
@@ -1161,22 +925,6 @@ pie
 
 # colors <- c("#FFA07A","#F08080", "#900C3F", "#C70039", "#D4442D","#FFF7B3","#52BE80","#75C7D3", "#00869F", "#6171AF","#DCB6D0","#C799C8", "#D2D2D2", "#7B7B7B","#585757")
 funcGA$Funding <- signif(funcGA$Funding, 5)
-# hc <- funcGA %>%
-#   hchart(
-#     "pie", hcaes(x = Category, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(funcGA$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_size(height=400,width=400)%>%
-#     hc_title(
-#     text = "Georgia Funding by Category",
-#     margin = 20,
-#     align = "left"
-#   )
-# hc
 ```
 </div>
 <div class = "col-md-5">
@@ -1234,22 +982,6 @@ pie
 
 # colors <- c("#FFA07A","#F08080", "#900C3F", "#C70039", "#D4442D","#00869F", "#6171AF","#DCB6D0","#C799C8","#7B7B7B","#585757")
 funcKY$Funding <- signif(funcKY$Funding, 5)
-# hc <- funcKY %>%
-#   hchart(
-#     "pie", hcaes(x = Category, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(funcKY$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_size(height=400,width=400)%>%
-#     hc_title(
-#     text = "Kentucky Funding by Category",
-#     margin = 20,
-#     align = "left"
-#   )
-# hc
 ```
 </div>
 <div class = "col-md-5">
@@ -1308,22 +1040,6 @@ pie
 
 # colors <- c("#FFA07A","#900C3F", "#C70039", "#D4442D","#FFF7B3","#AAC5E2","#00869F","#6171AF","#DCB6D0","#C799C8","#7B7B7B","#585757")
 funcLA$Funding <- signif(funcLA$Funding, 5)
-# hc <- funcLA %>%
-#   hchart(
-#     "pie", hcaes(x = Category, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(funcLA$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_size(height=400,width=400)%>%
-#     hc_title(
-#     text = "Louisiana Funding by Category",
-#     margin = 20,
-#     align = "left"
-#   )
-# hc
 ```
 </div>
 <div class = "col-md-5">
@@ -1382,22 +1098,6 @@ pie
 
 # colors <- c("#FFA07A","#900C3F", "#C70039", "#D4442D","#00869F", "#6171AF","#DCB6D0","#C799C8","#7B7B7B","#585757")
 funcMS$Funding <- signif(funcMS$Funding, 5)
-# hc <- funcMS %>%
-#   hchart(
-#     "pie", hcaes(x = Category, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(funcMS$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_size(height=400,width=400)%>%
-#     hc_title(
-#     text = "Mississippi Funding by Category",
-#     margin = 20,
-#     align = "left"
-#   )
-# hc
 ```
 </div>
 <div class = "col-md-5">
@@ -1455,22 +1155,6 @@ pie
 
 # colors <- c("#FFA07A","#900C3F", "#C70039", "#D4442D","#52BE80","#75C7D3", "#00869F", "#6171AF","#DCB6D0","#C799C8", "#D2D2D2", "#7B7B7B","#585757")
 funcNC$Funding <- signif(funcNC$Funding, 5)
-# hc <- funcNC %>%
-#   hchart(
-#     "pie", hcaes(x = Category, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(funcNC$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_size(height=400,width=400)%>%
-#     hc_title(
-#     text = "North Carolina Funding by Category",
-#     margin = 20,
-#     align = "left"
-#   )
-# hc
 ```
 </div>
 <div class = "col-md-5">
@@ -1528,23 +1212,6 @@ pie
 
 # colors <- c("#FFA07A","#900C3F", "#C70039", "#D4442D","#52BE80","#75C7D3", "#00869F", "#6171AF","#DCB6D0","#C799C8", "#D2D2D2", "#7B7B7B","#585757")
 funcSC$Funding <- signif(funcSC$Funding, 5)
-
-# hc <- funcSC %>%
-#   hchart(
-#     "pie", hcaes(x = Category, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(funcSC$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_size(height=400,width=400)%>%
-#     hc_title(
-#     text = "South Carolina Funding by Category",
-#     margin = 20,
-#     align = "left"
-#   )
-# hc
 ```
 </div>
 <div class = "col-md-5">
@@ -1602,23 +1269,6 @@ pie
 
 # colors <- c("#FFA07A","#F08080", "#900C3F", "#C70039", "#D4442D","#FFF7B3","#AAC5E2","#00869F","#6171AF","#DCB6D0","#C799C8", "#D2D2D2", "#7B7B7B","#585757")
 funcTN$Funding <- signif(funcTN$Funding, 5)
-
-# hc <- funcTN %>%
-#   hchart(
-#     "pie", hcaes(x = Category, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(funcTN$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_size(height=400,width=400)%>%
-#     hc_title(
-#     text = "Tennessee Funding by Category",
-#     margin = 20,
-#     align = "left"
-#   )
-# hc
 ```
 </div>
 <div class = "col-md-5">
@@ -1678,22 +1328,6 @@ pie
 # colors <- c("#FFA07A","#900C3F", "#C70039", "#D4442D", "#FCB616","#FFF7B3","#8FED94", "#52BE80", "#AAC5E2", "#75C7D3", "#00869F", "#6171AF","#DCB6D0","#C799C8", "#D2D2D2", "#7B7B7B","#585757")
 funcVA$Funding <- signif(funcVA$Funding, 5)
 
-# hc <- funcVA %>%
-#   hchart(
-#     "pie", hcaes(x = Category, y = Funding),
-#     name = "Funding ($)",
-#     tooltip= list(formattable::currency(funcVA$Funding,digits=0L)))%>%
-#     hc_colors(colors)%>%
-#     hc_plotOptions(pie=list(
-#       dataLabels = list(enabled = FALSE)
-#       ))%>%
-#     hc_size(height=400,width=400)%>%
-#     hc_title(
-#     text = "Virginia Funding by Category",
-#     margin = 20,
-#     align = "left"
-#   )
-# hc
 ```
 </div>
 <div class = "col-md-5">
