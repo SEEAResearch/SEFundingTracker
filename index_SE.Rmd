@@ -355,14 +355,14 @@ BIL$StateFunding <- formattable::currency(BIL$StateFunding)
 <div class = "col-md-8" style="padding-right:25px;">
 
 ```{r,  message=FALSE, warning=FALSE, echo=FALSE, out.width="100%"}
+
+##create interactive map with total and grant funding, this is main map on dashboard
 Regional <- RegMap
 Regional_Grants <- RegMap
 colnames(GrantsCA_df)[1] <-"STATE"
 Grantsmap <- left_join(SETerr, GrantsCA_df, by="STATE")
 #tmap
 tmap_mode(mode ="view")
-
-##create interactive map with total and grant funding, this is main map on dashboard
 BILmap <- tm_basemap("CartoDB.PositronNoLabels")+
 tm_shape(BIL) +
   tm_polygons("StateFunding",
@@ -604,7 +604,7 @@ SEdata$label <- paste(SEdata$State, SEdata$Percent, "%", sep=" ")
 
 <div class = "col-md-5">
 ``` {r echo=FALSE}
-##create table of funding in teh southeast for whitepaper
+##create table of funding in the southeast for whitepaper
 # SEdata <- SEdata[order(SEdata$Funding,decreasing=TRUE),]
 # SEdata$Funding<- formattable::currency(SEdata$Funding, digits=0L)
 # 
